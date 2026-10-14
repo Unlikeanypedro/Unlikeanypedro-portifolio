@@ -34,56 +34,59 @@ export default function Contact() {
   }
 
   return (
-    <section>
+    <>
       <PageHeading title={t.contact.title} subtitle={t.contact.subtitle} />
 
-      <div className="contact-links">
-        {contactLinks.map((l) => (
-          <a key={l.id} href={l.href} target="_blank" rel="noreferrer" className="contact-link">
-            <Icon name={l.id} />
-            <span>{l.label}</span>
-          </a>
-        ))}
-      </div>
+      <section className="sheet contact-sheet">
+        <div className="contact-sheet__links">
+          <p className="label">{t.contact.channels}</p>
+          {contactLinks.map((l) => (
+            <a key={l.id} href={l.href} target="_blank" rel="noreferrer" className="contact-link">
+              <Icon name={l.id} />
+              <span>{l.label}</span>
+            </a>
+          ))}
+        </div>
 
-      <form className="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <label>
-          {t.contact.name}
-          <input {...register('name', { required: t.contact.required })} />
-          {errors.name && <span className="form__error">{errors.name.message}</span>}
-        </label>
+        <form className="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <label>
+            {t.contact.name}
+            <input {...register('name', { required: t.contact.required })} />
+            {errors.name && <span className="form__error">{errors.name.message}</span>}
+          </label>
 
-        <label>
-          {t.contact.email}
-          <input
-            type="email"
-            {...register('email', {
-              required: t.contact.required,
-              pattern: { value: /^\S+@\S+\.\S+$/, message: t.contact.invalidEmail },
-            })}
-          />
-          {errors.email && <span className="form__error">{errors.email.message}</span>}
-        </label>
+          <label>
+            {t.contact.email}
+            <input
+              type="email"
+              {...register('email', {
+                required: t.contact.required,
+                pattern: { value: /^\S+@\S+\.\S+$/, message: t.contact.invalidEmail },
+              })}
+            />
+            {errors.email && <span className="form__error">{errors.email.message}</span>}
+          </label>
 
-        <label>
-          {t.contact.message}
-          <textarea
-            rows="5"
-            {...register('message', {
-              required: t.contact.required,
-              minLength: { value: 10, message: t.contact.minMessage },
-            })}
-          />
-          {errors.message && <span className="form__error">{errors.message.message}</span>}
-        </label>
+          <label>
+            {t.contact.message}
+            <textarea
+              rows="5"
+              {...register('message', {
+                required: t.contact.required,
+                minLength: { value: 10, message: t.contact.minMessage },
+              })}
+            />
+            {errors.message && <span className="form__error">{errors.message.message}</span>}
+          </label>
 
-        <button type="submit" className="btn" disabled={status === 'sending'}>
-          {status === 'sending' ? t.contact.sending : t.contact.send}
-        </button>
+          <button type="submit" className="btn" disabled={status === 'sending'}>
+            {status === 'sending' ? t.contact.sending : t.contact.send}
+          </button>
 
-        {status === 'success' && <p className="form__status form__status--ok">{t.contact.success}</p>}
-        {status === 'error' && <p className="form__status form__status--err">{t.contact.error}</p>}
-      </form>
-    </section>
+          {status === 'success' && <p className="form__status form__status--ok">{t.contact.success}</p>}
+          {status === 'error' && <p className="form__status form__status--err">{t.contact.error}</p>}
+        </form>
+      </section>
+    </>
   )
 }

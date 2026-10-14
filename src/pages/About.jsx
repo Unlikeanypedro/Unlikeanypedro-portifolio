@@ -1,23 +1,66 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import { profile } from '../data/profile.js'
+import { profile, contactLinks } from '../data/profile.js'
+import Icon from '../components/Icon.jsx'
+import Signature from '../components/Signature.jsx'
 import foto from '../assets/images/FotoPerfil.png'
 
 export default function About() {
   const { t } = useLanguage()
   return (
-    <section className="about">
-      <div className="about__text">
-        <h1>{profile.name}</h1>
-        <p className="about__role">{t.about.role}</p>
-        <p>{t.about.text}</p>
-        <Link to="/projetos" className="btn">
-          {t.about.cta}
-        </Link>
-      </div>
-      <div className="about__photo">
-        <img src={foto} alt="Foto Pedro Oliveira" className="about__photo-img" />
-      </div>
-    </section>
+    <>
+      {/* Capa */}
+      <section className="sheet cover">
+        <div className="cover__left">
+          <div className="cover__quote">
+            <span className="quote-mark" aria-hidden="true">”</span>
+            <p className="text">{t.about.quote}</p>
+          </div>
+          <div className="cover__contact">
+            <p className="label">{t.about.contactTitle}</p>
+            <div className="cover__contact-list">
+              {contactLinks.map((l) => (
+                <a key={l.id} href={l.href} target="_blank" rel="noreferrer">
+                  <Icon name={l.id} size={14} />
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="cover__main">
+          <h1 className="cover__name">
+            <Signature />
+          </h1>
+          <p className="cover__role">{t.about.role}</p>
+          <p className="cover__title">
+            {t.about.coverTitle}
+            <small>{profile.year} ——</small>
+          </p>
+          <Link to="/projetos" className="btn">
+            {t.about.cta}
+          </Link>
+        </div>
+
+        <div className="cover__photo">
+          <div className="image-block">
+            <img src={foto} alt={`Foto ${profile.name}`} />
+          </div>
+        </div>
+      </section>
+
+      {/* Sobre */}
+      <section className="sheet about-sheet">
+        <div className="about-sheet__box">
+          <h2>{t.about.title}</h2>
+          <p className="text">{t.about.text}</p>
+        </div>
+        <div className="about-sheet__strip" aria-hidden="true">
+          <div />
+          <div />
+        </div>
+      </section>
+    </>
   )
 }
