@@ -47,7 +47,7 @@ export default function Projects() {
             <span className="quote-mark" aria-hidden="true">”</span>
             <p className="text">{p.description[lang]}</p>
             <p className="project-sheet__techs">
-              <strong>{t.projects.techs}:</strong> {p.techs.join(' · ')}
+              <strong>{t.projects.techs}:</strong> {p.techs.join(' | ')}
             </p>
             <a href={p.repo} target="_blank" rel="noreferrer" className="btn btn--ghost">
               {t.projects.repo}

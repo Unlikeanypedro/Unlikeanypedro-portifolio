@@ -42,14 +42,13 @@ export const translations = {
   en: {
     nav: { about: 'About', projects: 'Projects', experiences: 'Experience', contact: 'Contact' },
     about: {
-      title: 'About me',
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-      quote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy.',
-      photoLabel: 'Put your photo here (src/assets/images/perfil.jpg)',
-      role: 'Software Engineer Student',
+      title: 'About Me',
+      text: 'I am a Software Engineering student at PUC Minas, interested in software development, problem-solving, and creating technological solutions. I have knowledge of Python, JavaScript, object-oriented programming, data structures, algorithms, and web development, as well as familiarity with version control tools and agile methodologies. My professional experience has helped me develop discipline, organizational skills, analytical thinking, and teamwork. I aim to apply these skills to technology projects and continuously grow as a software engineer.',
+      quote: 'Life can only be understood by looking backward, but it can only be lived by looking forward. -Søren Kierkegaard',
+      role: 'Software Engineering Student',
       coverTitle: 'Portfolio',
       contactTitle: 'Contact',
-      cta: 'See projects',
+      cta: 'View Projects',
     },
     projects: {
       title: 'Projects',
