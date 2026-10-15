@@ -2,18 +2,17 @@
 export const translations = {
   pt: {
     nav: { about: 'Sobre mim', projects: 'Projetos', experiences: 'Experiências', contact: 'Contato' },
+
     about: {
       title: 'Sobre mim',
-      // TODO: escreva sua apresentação (formação, área de atuação, interesses, objetivos)
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-      // TODO: uma frase curta sobre seu jeito de desenvolver e projetar
-      quote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy.',
-      photoLabel: 'Coloque aqui sua foto (src/assets/images/perfil.jpg)',
-      role: 'Estudante Eng. de Software',
+      text: 'Sou estudante de Engenharia de Software na PUC Minas, com interesse em desenvolvimento de software, resolução de problemas e criação de soluções tecnológicas. Tenho conhecimentos em Python, JavaScript, programação orientada a objetos, estruturas de dados, algoritmos e desenvolvimento web, além de familiaridade com ferramentas de versionamento e metodologias ágeis. Minhas experiências profissionais contribuíram para desenvolver disciplina, organização, capacidade analítica e trabalho em equipe. Busco aplicar essas competências em projetos de tecnologia e evoluir continuamente como engenheiro de software.',
+      quote: 'A vida só pode ser compreendida olhando-se para trás, mas só pode ser vivida olhando-se para a frente. - Soren Kierkegaard',
+      role: 'Estudante de Engenharia de Software',
       coverTitle: 'Portfólio',
       contactTitle: 'Contato',
       cta: 'Ver projetos',
     },
+
     projects: {
       title: 'Projetos',
       subtitle: 'Do mais antigo ao mais recente',
