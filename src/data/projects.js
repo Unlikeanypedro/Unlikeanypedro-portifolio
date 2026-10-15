@@ -1,4 +1,7 @@
 import artfinder from '../assets/projects/image-1.png'
+import logo from '../assets/projects/logo.png'
+import solidarize from '../assets/projects/solidarize.png'
+import drecut from '../assets/projects/drecut.png'
 
 export const projects = [
   {
@@ -10,7 +13,7 @@ export const projects = [
       en: 'The project aims to develop a digital platform that facilitates the proper disposal of special and hazardous waste, such as expired medications, syringes, needles, batteries, and electronic equipment. The solution seeks to inform users about appropriate storage and disposal methods and provide a map of nearby collection points, making the process more accessible, practical, and safe.',
     },
     techs: ['React','Springboot'],
-    image: null,
+    image: logo,
   },
   {
     id: 2,
@@ -21,7 +24,7 @@ export const projects = [
       en: 'Final project for the Introduction to Algorithms/Programming course, developed using Python and Pygame. A detective searches for clues to solve mysteries and find a murderer.',
     },
     techs: ['Python','Pygame'],
-    image: null,
+    image: drecut,
   },
   {
     id: 3,
@@ -33,7 +36,7 @@ export const projects = [
     },
     techs: ['HTML', 'CSS', 'JavaScript'],
     repo: 'https://solidarize.onrender.com',
-    image: null,
+    image: solidarize,
   },
   {
     id: 4,
