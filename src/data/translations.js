@@ -22,6 +22,17 @@ export const translations = {
       repo: 'Ver repositório',
       imageLabel: 'Coloque aqui um print ou GIF do projeto',
     },
+    intro: {
+      label: 'Introdução',
+      messages: [
+        'O portfólio tem dois modos: para ir direto às informações, aperte o X para pular o início. Caso não queira mais ver a introdução, marque a opção “visto”.',
+        'Caso queira ter a experiência imersiva, aperte a opção de jogar e você vai controlar o ghost pelo portfólio; Aproveite',
+        '“As únicas pessoas que nunca fracassam são as que nunca tentam.” — Ilka Chase',
+        'Pressione enter para continuar',
+      ],
+      seen: 'visto',
+      skip: 'Pular introdução',
+    },
     experiences: { title: 'Experiências', subtitle: 'Estágios, freelas, open source e eventos' },
     contact: {
       title: 'Contato',
@@ -59,6 +70,17 @@ export const translations = {
       techs: 'Technologies',
       repo: 'View repository',
       imageLabel: 'Put a screenshot or GIF of the project here',
+    },
+    intro: {
+      label: 'Introduction',
+      messages: [
+        'The portfolio has two modes: to go straight to the information, press X to skip the intro. If you no longer want to see the introduction, check the “seen” option.',
+        'If you want the immersive experience, press the play option and you will control the ghost through the portfolio; Enjoy',
+        '“The only people who never fail are those who never try.” — Ilka Chase',
+        'Press enter to continue',
+      ],
+      seen: 'seen',
+      skip: 'Skip intro',
     },
     experiences: { title: 'Experience', subtitle: 'Internships, freelance, open source and events' },
     contact: {

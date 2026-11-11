@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import bgImage from "../assets/videos/bg/1794367472683.jpg";
 import Ornament from "../components/Ornament.jsx";
+import Intro, { readIntroSeen } from "../components/Intro.jsx";
 
 // Posições aproximadas das borboletas brancas na arte de fundo (em %).
 // d = atraso da animação, para que pisquem em tempos diferentes.
@@ -51,6 +52,9 @@ const menuIcons = [
 export default function InitialMenu() {
     const { lang, t } = useLanguage();
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [introOpen, setIntroOpen] = useState(() => !readIntroSeen());
+
+    const finishIntro = useCallback(() => setIntroOpen(false), []);
 
     const items = itemTo[lang].map((to, i) => ({
         to,
@@ -58,6 +62,9 @@ export default function InitialMenu() {
     }));
 
     useEffect(() => {
+        // A introdução controla o teclado enquanto estiver aberta.
+        if (introOpen) return;
+
         const handleKeyDown = (e) => {
             switch (e.key) {
                 case "ArrowDown":
@@ -86,9 +93,12 @@ export default function InitialMenu() {
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [selectedIndex, items.length]);
+    }, [selectedIndex, items.length, introOpen]);
 
     return (
+        <>
+        {introOpen && <Intro onFinish={finishIntro} />}
+
         <div className="initial-menu">
             <div
                 className="initial-menu__bg"
@@ -142,5 +152,6 @@ export default function InitialMenu() {
             <span className="menu-version">Portfólio · 2026</span>
             <span className="menu-credit">pedro oliveira</span>
         </div>
+        </>
     );
 }
