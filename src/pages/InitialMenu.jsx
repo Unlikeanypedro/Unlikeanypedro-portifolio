@@ -132,9 +132,6 @@ export default function InitialMenu() {
                             className={`menu-item ${selectedIndex === i ? "is-active" : ""}`}
                             aria-current={selectedIndex === i}
                         >
-                            <span className="menu-item__icon" aria-hidden="true">
-                                {menuIcons[i][lang]}
-                            </span>
                             <span className="menu-item__bullet">✦</span>
                             {item.label}
                         </Link>
