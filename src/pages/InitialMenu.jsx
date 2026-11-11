@@ -89,7 +89,7 @@ export default function InitialMenu() {
     }, [selectedIndex, items.length]);
 
     return (
-        <div className="initial-menu" style={{ overflowY: "auto" }}>
+        <div className="initial-menu">
             <div
                 className="initial-menu__bg"
                 style={{ backgroundImage: `url(${bgImage})` }}
@@ -119,9 +119,7 @@ export default function InitialMenu() {
                     <span className="menu-title-card__eyebrow">
                         {lang === "pt" ? "Portfólio" : "Portfolio"}
                     </span>
-                    <h1 style={{ fontSize: "clamp(3.6rem, 6.8vw, 5.2rem)", margin: "0.5rem 0 1.2rem" }}>
-                        Pedro Oliveira
-                    </h1>
+                    <h1>Pedro Oliveira</h1>
                     <Ornament className="menu-title-card__ornament" />
                     <p className="menu-title-card__role">{t.about.role}</p>
                 </section>
@@ -132,10 +130,11 @@ export default function InitialMenu() {
                             key={item.to}
                             to={item.to}
                             className={`menu-item ${selectedIndex === i ? "is-active" : ""}`}
-                            style={{
-                                textShadow: selectedIndex === i ? "var(--glow)" : "0 1px 10px rgba(0,0,0,0.85)",
-                            }}
+                            aria-current={selectedIndex === i}
                         >
+                            <span className="menu-item__icon" aria-hidden="true">
+                                {menuIcons[i][lang]}
+                            </span>
                             <span className="menu-item__bullet">✦</span>
                             {item.label}
                         </Link>
