@@ -1,60 +1,61 @@
-import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import menuVideo from "../assets/videos/bg/menuVideoBG.mp4";
+import { useLanguage } from "../context/LanguageContext.jsx";
+import bgImage from "../assets/videos/bg/1794367472683.jpg";
+import Ornament from "../components/Ornament.jsx";
 
 export default function InitialMenu() {
-    const videoRef = useRef(null);
+    const { lang, t } = useLanguage();
 
-    const menuItems = [
-        { label: "sobre", path: "/sobre" },
-        { label: "projetos", path: "/projetos" },
-        { label: "experiencia", path: "/experiencias" },
-        { label: "contato", path: "/contato" },
-    ];
-
-    useEffect(() => {
-        const video = videoRef.current;
-        if (video) {
-            video.muted = true;
-            video.play().catch(() => {
-                // Autoplay may be blocked by browser, user interaction needed
-            });
-        }
-    }, []);
+    const items =
+        lang === "pt"
+            ? [
+                  { label: "sobre", to: "/sobre" },
+                  { label: "projetos", to: "/projetos" },
+                  { label: "experiência", to: "/experiencias" },
+                  { label: "contato", to: "/contato" },
+              ]
+            : [
+                  { label: "about", to: "/sobre" },
+                  { label: "projects", to: "/projetos" },
+                  { label: "experience", to: "/experiencias" },
+                  { label: "contact", to: "/contato" },
+              ];
 
     return (
         <div className="initial-menu">
-            <video
-                ref={videoRef}
-                className="menu-bg-video"
-                autoPlay
-                loop
-                muted
-                playsInline
-            >
-                <source src={menuVideo} type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
+            <div
+                className="initial-menu__bg"
+                style={{ backgroundImage: `url(${bgImage})` }}
+                aria-hidden="true"
+            />
+            <div className="initial-menu__veil" aria-hidden="true" />
 
-            <main className="menu-content">
-                <section className="menu-title-card" aria-label="Portfolio">
-                    <p>Unlikeanypedro</p>
-                    <h1>Portifolio</h1>
+            <div className="menu-content">
+                <section className="menu-title-card" aria-label="Portfólio">
+                    <span className="menu-title-card__eyebrow">
+                        {lang === "pt" ? "Portfólio" : "Portfolio"}
+                    </span>
+                    <h1>Pedro Oliveira</h1>
+                    <Ornament className="menu-title-card__ornament" />
+                    <p className="menu-title-card__role">{t.about.role}</p>
                 </section>
 
                 <nav className="menu-nav-card" aria-label="Navegação principal">
-                    {menuItems.map((item) => (
+                    {items.map((item) => (
                         <Link
-                            key={item.label}
-                            to={item.path}
+                            key={item.to}
+                            to={item.to}
                             className="menu-item"
                         >
+                            <span className="menu-item__bullet">✦</span>
                             {item.label}
                         </Link>
                     ))}
                 </nav>
-            </main>
-            <span className="menu-version">Portifólio · 2026</span>
+            </div>
+
+            <span className="menu-version">Portfólio · 2026</span>
+            <span className="menu-credit">pedro oliveira</span>
         </div>
     );
 }

@@ -17,7 +17,7 @@ export default function App() {
                 <Route path="experiencias" element={<Experiences />} />
                 <Route path="contato" element={<Contact />} />
                 <Route path="mapa" element={<Map />} />
-                <Route path="*" element={<InitialMenu />} />
+                <Route path="*" element={<About />} />
             </Route>
         </Routes>
     );
