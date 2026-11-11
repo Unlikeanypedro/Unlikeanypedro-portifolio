@@ -32,7 +32,8 @@
     /* Demais textos em Perpetua Titling MT (PERTIBD) */
     --font-perpetua: "Perpetua Titling MT", serif;
     --label: "Perpetua Titling MT", serif;
-    --body: "Perpetua Titling MT", serif;
+    /* Corpo de texto: fonte legível (Raleway já carregada no index.html) */
+    --body: "Raleway", "Segoe UI", system-ui, -apple-system, sans-serif;
     --max: 1100px;
 }
 
@@ -628,28 +629,40 @@ button {
    ============================================================ */
 .about {
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
-    gap: clamp(1.5rem, 4vw, 3rem);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    max-width: 1040px;
+    margin-inline: auto;
 }
 
 .about__portrait {
+    margin: 0 auto;
+    width: 100%;
     border: 1px solid var(--line);
     background: var(--panel);
-    padding: 0.5rem;
+    padding: 0.6rem;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
 .about__portrait img {
     width: 100%;
     aspect-ratio: 4 / 5;
+    max-height: 68svh;
     object-fit: cover;
-    filter: grayscale(0.2) contrast(1.05);
+    filter: grayscale(0.15) contrast(1.03);
 }
 
 .about__body {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.1rem;
+}
+
+.about__text {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #d5dceb;
 }
 
 .about__role {
@@ -661,12 +674,13 @@ button {
 }
 
 .about__quote {
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     padding-left: 1rem;
     border-left: 2px solid var(--accent);
-    font-family: var(--font-perpetua);
-    font-size: clamp(1.05rem, 1.8vw, 1.35rem);
-    line-height: 1.5;
+    font-family: var(--body);
+    font-style: italic;
+    font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+    line-height: 1.6;
     color: var(--ink);
 }
 
@@ -937,7 +951,7 @@ button {
     }
 
     .about__portrait {
-        max-width: 320px;
+        max-width: 420px;
     }
 
     .project,
