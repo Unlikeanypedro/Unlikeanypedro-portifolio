@@ -148,6 +148,8 @@ button {
 }
 
 .menu-content {
+    position: relative;
+    z-index: 2;
     width: min(360px, 92vw);
     margin-left: auto;
     display: flex;
@@ -155,14 +157,99 @@ button {
     gap: clamp(1rem, 2.4vh, 1.6rem);
 }
 
+/* Sem caixas: apenas os textos e efeitos sobre o fundo. */
 .menu-title-card,
 .menu-nav-card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    backdrop-filter: blur(6px);
-    box-shadow:
-        0 22px 60px rgba(0, 0, 0, 0.5),
-        inset 0 0 40px rgba(120, 150, 200, 0.05);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+/* Atmosfera animada do fundo: luz do poste + borboletas brancas. */
+.menu-atmosphere {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.glow-lamp {
+    position: absolute;
+    left: 48%;
+    top: 44%;
+    width: 34vmax;
+    height: 34vmax;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(214, 230, 255, 0.5) 0%,
+        rgba(180, 205, 245, 0.18) 30%,
+        rgba(160, 190, 240, 0) 68%
+    );
+    mix-blend-mode: screen;
+    opacity: 0.45;
+    animation: lamp-flicker 4.5s ease-in-out infinite;
+}
+
+@keyframes lamp-flicker {
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    35% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.06);
+    }
+    55% {
+        opacity: 0.55;
+    }
+    72% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.03);
+    }
+}
+
+.butterfly {
+    position: absolute;
+    left: calc(var(--x) * 1%);
+    top: calc(var(--y) * 1%);
+    width: clamp(10px, 1.3vw, 20px);
+    color: #fff;
+    opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(220, 235, 255, 0.9));
+    animation: butterfly-glow 5s ease-in-out infinite;
+    animation-delay: calc(var(--d) * 1s);
+}
+
+.butterfly svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    fill: currentColor;
+}
+
+@keyframes butterfly-glow {
+    0%,
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.75);
+    }
+    45% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) translateY(-6px);
+    }
+    60% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1) translateY(-8px);
+    }
+    78% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.85) translateY(-12px);
+    }
 }
 
 .menu-title-card {
@@ -176,6 +263,7 @@ button {
     letter-spacing: 0.44em;
     text-transform: uppercase;
     color: var(--muted);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 
 .menu-title-card h1 {
@@ -199,6 +287,7 @@ button {
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 
 .menu-nav-card {
@@ -217,16 +306,11 @@ button {
     letter-spacing: 0.04em;
     text-transform: lowercase;
     color: var(--ink);
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.85);
     transition:
         color 0.18s ease,
         transform 0.18s ease,
         letter-spacing 0.18s ease;
-}
-
-.menu-item + .menu-item {
-    border-top-color: rgba(205, 219, 242, 0.08);
 }
 
 .menu-item__bullet {
