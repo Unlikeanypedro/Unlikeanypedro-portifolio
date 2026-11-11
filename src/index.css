@@ -10,7 +10,7 @@
     font-family: "Perpetua Titling MT";
     src: url("./assets/fonts/perpetua-titling-mt/PERTIBD.ttf")
         format("truetype");
-    font-weight: 700;
+    font-weight: 400 700;
     font-style: normal;
     font-display: swap;
 }
@@ -27,10 +27,12 @@
     --panel: rgba(8, 12, 20, 0.72);
     --glow: 0 0 18px rgba(180, 205, 245, 0.35);
 
+    /* Títulos em Trajan */
     --font-title: "trajan", serif;
+    /* Demais textos em Perpetua Titling MT (PERTIBD) */
     --font-perpetua: "Perpetua Titling MT", serif;
-    --label: "Oswald", "Arial Narrow", sans-serif;
-    --body: "Raleway", system-ui, sans-serif;
+    --label: "Perpetua Titling MT", serif;
+    --body: "Perpetua Titling MT", serif;
     --max: 1100px;
 }
 
@@ -301,7 +303,7 @@ button {
     align-items: center;
     gap: 0.7rem;
     padding: 0.7rem 0.4rem;
-    font-family: var(--font-title);
+    font-family: var(--font-perpetua);
     font-size: clamp(1.15rem, 1.9vw, 1.45rem);
     letter-spacing: 0.04em;
     text-transform: lowercase;
@@ -352,7 +354,7 @@ button {
     position: absolute;
     right: clamp(1rem, 3vw, 2rem);
     bottom: clamp(1rem, 3vw, 1.75rem);
-    font-family: var(--font-title);
+    font-family: var(--font-perpetua);
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     color: var(--muted);
@@ -751,7 +753,7 @@ button {
 }
 
 .timeline__num {
-    font-family: var(--font-title);
+    font-family: var(--font-perpetua);
     font-size: 1.4rem;
     color: var(--accent);
 }
@@ -815,7 +817,7 @@ button {
     align-items: center;
     gap: 0.6rem;
     padding: 0.8rem 0;
-    font-family: var(--font-title);
+    font-family: var(--font-perpetua);
     font-size: 1.1rem;
     transition:
         color 0.18s ease,
