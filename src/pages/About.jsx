@@ -24,9 +24,19 @@ export default function About() {
                         </span>
                         {t.about.quote}
                     </blockquote>
-                    <Link to="/projetos" className="btn">
-                        {t.about.cta}
-                    </Link>
+                    <div className="about__actions">
+                        <Link to="/projetos" className="btn">
+                            {t.about.cta}
+                        </Link>
+                        <a
+                            className="btn btn--ghost"
+                            href="/curriculo.pdf"
+                            download="Pedro-Oliveira-Curriculo.pdf"
+                        >
+                            {t.about.downloadResume}
+                            <span aria-hidden="true">↓</span>
+                        </a>
+                    </div>
                 </div>
 
                 <figure className="about__portrait">

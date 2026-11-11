@@ -46,6 +46,14 @@ export default function Layout() {
                     ))}
                 </nav>
 
+                <a
+                    className="resume-link"
+                    href="/curriculo.pdf"
+                    download="Pedro-Oliveira-Curriculo.pdf"
+                >
+                    <span aria-hidden="true">↓</span> {t.nav.resume}
+                </a>
+
                 <button
                     type="button"
                     className="lang-toggle"

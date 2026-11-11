@@ -1,7 +1,7 @@
 // Textos fixos da interface em PT e EN. Textos lorem são provisórios: troque pelos seus.
 export const translations = {
   pt: {
-    nav: { about: 'Sobre mim', projects: 'Projetos', experiences: 'Experiências', contact: 'Contato' },
+    nav: { about: 'Sobre mim', projects: 'Projetos', experiences: 'Experiências', contact: 'Contato', resume: 'Currículo' },
 
     about: {
       title: 'Sobre mim',
@@ -11,6 +11,7 @@ export const translations = {
       coverTitle: 'Portfólio',
       contactTitle: 'Contato',
       cta: 'Ver projetos',
+      downloadResume: 'Baixar currículo',
     },
 
     projects: {
@@ -40,7 +41,7 @@ export const translations = {
     footer: 'Todos os direitos reservados.',
   },
   en: {
-    nav: { about: 'About', projects: 'Projects', experiences: 'Experience', contact: 'Contact' },
+    nav: { about: 'About', projects: 'Projects', experiences: 'Experience', contact: 'Contact', resume: 'Resume' },
     about: {
       title: 'About Me',
       text: 'I am a Software Engineering student at PUC Minas, interested in software development, problem-solving, and creating technological solutions. I have knowledge of Python, JavaScript, object-oriented programming, data structures, algorithms, and web development, as well as familiarity with version control tools and agile methodologies. My professional experience has helped me develop discipline, organizational skills, analytical thinking, and teamwork. I aim to apply these skills to technology projects and continuously grow as a software engineer.',
@@ -49,6 +50,7 @@ export const translations = {
       coverTitle: 'Portfolio',
       contactTitle: 'Contact',
       cta: 'View Projects',
+      downloadResume: 'Download résumé',
     },
     projects: {
       title: 'Projects',
