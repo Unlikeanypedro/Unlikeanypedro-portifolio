@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
 
+/**
+ * Sprite class — handles frame-based animation from an array of images.
+ */
 class Sprite {
     constructor({ images, frameRate = 1, frameBuffer = 5, loop = true }) {
         this.images = images;
@@ -46,6 +49,9 @@ class Sprite {
     }
 }
 
+/**
+ * Loads an array of image paths and returns a Promise that resolves when all are ready.
+ */
 const loadImages = async (paths) => {
     const imgs = await Promise.all(
         paths.map((path) => {
@@ -69,6 +75,7 @@ class Player {
         this.sprites = sprites;
         this.currentSprite = sprites.idle;
         this.scale = scale;
+        // collision box (kept square for physics)
         this.width = 100;
         this.height = 100;
         this.facingRight = true;
@@ -76,18 +83,25 @@ class Player {
 
     draw(c) {
         const sprite = this.currentSprite;
-        const width = this.width * this.scale;
-        const height = this.height * this.scale;
-        // FIXED: pass facingRight directly (not inverted)
-        // Base sprites face left, so mirror when facing right
-        sprite.draw(
-            c,
-            this.position.x,
-            this.position.y,
-            width,
-            height,
-            this.facingRight,
-        );
+        const img = sprite.images[sprite.currentFrame];
+
+        // base draw size doubled (scale = 2)
+        const baseSize = 100 * this.scale; // 200
+
+        let drawWidth = baseSize;
+        let drawHeight = baseSize;
+
+        // preserve aspect ratio so the sprite is not stretched
+        if (img && img.naturalWidth && img.naturalHeight) {
+            const aspectRatio = img.naturalHeight / img.naturalWidth;
+            drawHeight = drawWidth * aspectRatio;
+        }
+
+        // center vertically on the collision box so it feels planted
+        const drawX = this.position.x;
+        const drawY = this.position.y + (this.height - drawHeight) / 2;
+
+        sprite.draw(c, drawX, drawY, drawWidth, drawHeight, this.facingRight);
     }
 
     update(keys, canvasWidth, canvasHeight) {
@@ -154,18 +168,21 @@ export default function Map() {
         canvas.width = 1024;
         canvas.height = 576;
 
+        // --- Idle still animation (9 frames): Knight_idle_still_020000.png ... 020008.png ---
         const idlePaths = Array.from(
             { length: 9 },
             (_, i) =>
                 `/src/assets/sprites/the_knight/idle_still/Knight_idle_still_020${String(i).padStart(3, "0")}.png`,
         );
 
+        // --- Walk animation (8 frames): Knight_walk0000.png ... Knight_walk0007.png ---
         const walkPaths = Array.from(
             { length: 8 },
             (_, i) =>
                 `/src/assets/sprites/the_knight/walk/Knight_walk${String(i).padStart(4, "0")}.png`,
         );
 
+        // --- Jump animation (6 frames): Knight_jump_01.png ... Knight_jump_06.png ---
         const jumpPaths = Array.from(
             { length: 6 },
             (_, i) =>
@@ -181,6 +198,7 @@ export default function Map() {
             d: { pressed: false },
         };
 
+        // Load all images first, then start the loop
         Promise.all([
             loadImages(idlePaths),
             loadImages(walkPaths),
@@ -202,7 +220,7 @@ export default function Map() {
                     velocity: { x: 0, y: 0 },
                     gravity: 0.8,
                     sprites,
-                    scale: 1,
+                    scale: 2, // double the size
                 });
             })
             .catch((err) => {
