@@ -77,15 +77,29 @@ export default function Intro({ onFinish }) {
             window.clearInterval(retry);
             window.clearTimeout(timer);
         };
-    }, []);
-
-    // Primeiro clique/toque na intro também destrava a reprodução.
+    }, []);    // Primeiro clique/toque na intro também destrava a reprodução.
     const handlePointerDown = () => {
         const el = videoRef.current;
         if (!el || !el.paused) return;
         const attempt = el.play();
-        if (attempt && typeof attempt.catch === "function")
-            attempt.catch(() => {});
+        if (attempt && typeof attempt.catch === "function") attempt.catch(() => {});
+    };
+
+    // Avança uma mensagem (ou inicia o fade final).
+    const advance = useCallback(() => {
+        if (closing) return;
+        if (step < messages.length - 1) {
+            setStep(step + 1);
+        } else {
+            startFadeOut();
+        }
+    }, [closing, step, messages.length, startFadeOut]);
+
+    // Clique/toque na tela também pula as mensagens (essencial no mobile).
+    const handleScreenPointerDown = (event) => {
+        if (event.target.closest("button, input, label, a")) return;
+        handlePointerDown();
+        advance();
     };
 
     // Enter avança as mensagens; na última, faz o fade para o menu.
@@ -93,18 +107,13 @@ export default function Intro({ onFinish }) {
         const handleKeyDown = (event) => {
             if (event.key !== "Enter") return;
             event.preventDefault();
-            if (closing) return;
             handlePointerDown();
-            if (step < messages.length - 1) {
-                setStep(step + 1);
-            } else {
-                startFadeOut();
-            }
+            advance();
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [step, messages.length, closing, startFadeOut]);
+    }, [advance]);
 
     const handleSeenChange = (event) => {
         const value = event.target.checked;
@@ -122,7 +131,7 @@ export default function Intro({ onFinish }) {
             role="dialog"
             aria-modal="true"
             aria-label={t.intro.label}
-            onPointerDown={handlePointerDown}
+            onPointerDown={handleScreenPointerDown}
         >
             <div
                 className="intro__backdrop"

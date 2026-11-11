@@ -40,6 +40,24 @@ const itemTo = {
     en: ["/mapa", "/sobre", "/projetos", "/experiencias", "/contato"],
 };
 
+const COMPACT_QUERY = "(max-width: 720px)";
+
+// Detecta o layout compacto (celular) para esconder o modo jogar.
+function useIsCompact() {
+    const [compact, setCompact] = useState(
+        () => window.matchMedia(COMPACT_QUERY).matches,
+    );
+
+    useEffect(() => {
+        const mql = window.matchMedia(COMPACT_QUERY);
+        const handleChange = (event) => setCompact(event.matches);
+        mql.addEventListener("change", handleChange);
+        return () => mql.removeEventListener("change", handleChange);
+    }, []);
+
+    return compact;
+}
+
 // Ícones decorativos ao lado de cada item (usando SVG do Hollow Knight estilo)
 const menuIcons = [
     { pt: "🐞", en: "🪲" },
@@ -56,10 +74,14 @@ export default function InitialMenu() {
 
     const finishIntro = useCallback(() => setIntroOpen(false), []);
 
-    const items = itemTo[lang].map((to, i) => ({
-        to,
-        label: menuLabels[lang][i],
-    }));
+    const isCompact = useIsCompact();
+
+    // No celular o modo "jogar" não aparece na lista.
+    const items = itemTo[lang]
+        .map((to, i) => ({ to, label: menuLabels[lang][i] }))
+        .filter((item) => !(isCompact && item.to === "/mapa"));
+
+    const activeIndex = Math.min(selectedIndex, items.length - 1);
 
     useEffect(() => {
         // A introdução controla o teclado enquanto estiver aberta.
@@ -85,7 +107,7 @@ export default function InitialMenu() {
                 }
                 case "Enter": {
                     e.preventDefault();
-                    const target = items[selectedIndex].to;
+                    const target = items[activeIndex].to;
                     window.location.href = target;
                     break;
                 }
@@ -93,7 +115,7 @@ export default function InitialMenu() {
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [selectedIndex, items.length, introOpen]);
+    }, [selectedIndex, items.length, introOpen, activeIndex]);
 
     return (
         <>
@@ -139,8 +161,8 @@ export default function InitialMenu() {
                         <Link
                             key={item.to}
                             to={item.to}
-                            className={`menu-item ${selectedIndex === i ? "is-active" : ""}`}
-                            aria-current={selectedIndex === i}
+                            className={`menu-item ${activeIndex === i ? "is-active" : ""}`}
+                            aria-current={activeIndex === i}
                         >
                             <span className="menu-item__bullet">✦</span>
                             {item.label}
