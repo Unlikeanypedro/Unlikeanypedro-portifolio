@@ -1,8 +1,5 @@
 import { useEffect, useRef } from "react";
 
-/**
- * Sprite class — handles frame-based animation from an array of images.
- */
 class Sprite {
     constructor({ images, frameRate = 1, frameBuffer = 5, loop = true }) {
         this.images = images;
@@ -32,7 +29,6 @@ class Sprite {
     draw(c, x, y, width, height, flip = false) {
         const img = this.images[this.currentFrame];
         if (!img || !img.complete || !img.naturalWidth) {
-            // fallback: draw a colored rect while image loads
             c.fillStyle = flip ? "#ff00ff" : "#00ff00";
             c.fillRect(x, y, width, height);
             return;
@@ -50,9 +46,6 @@ class Sprite {
     }
 }
 
-/**
- * Loads an array of image paths and returns a Promise that resolves when all are ready.
- */
 const loadImages = async (paths) => {
     const imgs = await Promise.all(
         paths.map((path) => {
@@ -85,48 +78,58 @@ class Player {
         const sprite = this.currentSprite;
         const width = this.width * this.scale;
         const height = this.height * this.scale;
+        // FIXED: pass facingRight directly (not inverted)
+        // Base sprites face left, so mirror when facing right
         sprite.draw(
             c,
             this.position.x,
             this.position.y,
             width,
             height,
-            !this.facingRight,
+            this.facingRight,
         );
     }
 
     update(keys, canvasWidth, canvasHeight) {
-        let moving = false;
+        const onGround = this.position.y + this.height >= canvasHeight - 30;
 
-        if (keys.d.pressed) {
-            this.velocity.x = 7;
-            this.facingRight = true;
-            moving = true;
-            this.currentSprite = this.sprites.run;
-        } else if (keys.a.pressed) {
-            this.velocity.x = -7;
-            this.facingRight = false;
-            moving = true;
-            this.currentSprite = this.sprites.run;
+        // --- Animation state ---
+        if (!onGround) {
+            this.currentSprite = this.sprites.jump;
+        } else if (keys.d.pressed || keys.a.pressed) {
+            this.currentSprite = this.sprites.walk;
         } else {
-            this.velocity.x = 0;
             this.currentSprite = this.sprites.idle;
         }
 
-        const onGround = this.position.y + this.height >= canvasHeight - 30;
+        // --- Horizontal movement ---
+        if (keys.d.pressed) {
+            this.velocity.x = 7;
+            this.facingRight = true;
+        } else if (keys.a.pressed) {
+            this.velocity.x = -7;
+            this.facingRight = false;
+        } else {
+            this.velocity.x = 0;
+        }
+
+        // --- Jump ---
         if (keys.space.pressed && onGround) {
             this.velocity.y = -18;
         }
 
+        // --- Physics ---
         this.velocity.y += this.gravity;
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
 
+        // --- Floor collision ---
         if (this.position.y + this.height > canvasHeight - 30) {
             this.position.y = canvasHeight - 30 - this.height;
             this.velocity.y = 0;
         }
 
+        // --- Wall collision ---
         if (this.position.x < 0) {
             this.position.x = 0;
             this.velocity.x = 0;
@@ -157,10 +160,16 @@ export default function Map() {
                 `/src/assets/sprites/the_knight/idle_still/Knight_idle_still_020${String(i).padStart(3, "0")}.png`,
         );
 
-        const runPaths = Array.from(
+        const walkPaths = Array.from(
             { length: 8 },
             (_, i) =>
-                `/src/assets/sprites/the_knight/run/Knight_run${String(i).padStart(4, "0")}.png`,
+                `/src/assets/sprites/the_knight/walk/Knight_walk${String(i).padStart(4, "0")}.png`,
+        );
+
+        const jumpPaths = Array.from(
+            { length: 6 },
+            (_, i) =>
+                `/src/assets/sprites/the_knight/jump/Knight_jump_${String(i + 1).padStart(2, "0")}.png`,
         );
 
         let sprites = null;
@@ -172,12 +181,20 @@ export default function Map() {
             d: { pressed: false },
         };
 
-        // Load all images first, then start the loop
-        Promise.all([loadImages(idlePaths), loadImages(runPaths)])
-            .then(([idleImgs, runImgs]) => {
+        Promise.all([
+            loadImages(idlePaths),
+            loadImages(walkPaths),
+            loadImages(jumpPaths),
+        ])
+            .then(([idleImgs, walkImgs, jumpImgs]) => {
                 sprites = {
                     idle: new Sprite({ images: idleImgs, frameBuffer: 10 }),
-                    run: new Sprite({ images: runImgs, frameBuffer: 5 }),
+                    walk: new Sprite({ images: walkImgs, frameBuffer: 6 }),
+                    jump: new Sprite({
+                        images: jumpImgs,
+                        frameBuffer: 4,
+                        loop: false,
+                    }),
                 };
 
                 player = new Player({
@@ -231,7 +248,6 @@ export default function Map() {
                 player.update(keys, canvas.width, canvas.height);
                 player.draw(c);
             } else {
-                // fallback while loading
                 c.fillStyle = "white";
                 c.font = "20px sans-serif";
                 c.fillText("Loading sprites...", 400, 280);
