@@ -79,13 +79,14 @@ class Player {
         this.width = 100;
         this.height = 100;
         this.facingRight = true;
+        this.isAttacking = false;
     }
 
     draw(c) {
         const sprite = this.currentSprite;
         const img = sprite.images[sprite.currentFrame];
 
-        // base draw size doubled (scale = 2)
+        // base draw size 2x (scale = 2 -> 200px)
         const baseSize = 100 * this.scale; // 200
 
         let drawWidth = baseSize;
@@ -107,29 +108,47 @@ class Player {
     update(keys, canvasWidth, canvasHeight) {
         const onGround = this.position.y + this.height >= canvasHeight - 30;
 
-        // --- Animation state ---
-        if (!onGround) {
-            this.currentSprite = this.sprites.jump;
-        } else if (keys.d.pressed || keys.a.pressed) {
-            this.currentSprite = this.sprites.walk;
-        } else {
-            this.currentSprite = this.sprites.idle;
-        }
+        // --- Attack takes absolute priority ---
+        if (this.isAttacking) {
+            this.currentSprite = this.sprites.attack;
 
-        // --- Horizontal movement ---
-        if (keys.d.pressed) {
-            this.velocity.x = 7;
-            this.facingRight = true;
-        } else if (keys.a.pressed) {
-            this.velocity.x = -7;
-            this.facingRight = false;
-        } else {
+            // lock all horizontal movement during attack
             this.velocity.x = 0;
-        }
 
-        // --- Jump ---
-        if (keys.space.pressed && onGround) {
-            this.velocity.y = -18;
+            // check if attack animation finished
+            if (this.currentSprite.finished) {
+                this.isAttacking = false;
+                this.currentSprite.finished = false;
+                this.currentSprite.currentFrame = 0;
+            }
+        } else {
+            // --- Animation state (only when not attacking) ---
+            if (!onGround) {
+                // in air -> jump animation
+                this.currentSprite = this.sprites.jump;
+            } else if (keys.d.pressed || keys.a.pressed) {
+                // moving on ground -> walk animation
+                this.currentSprite = this.sprites.walk;
+            } else {
+                // standing still -> idle animation
+                this.currentSprite = this.sprites.idle;
+            }
+
+            // --- Horizontal movement ---
+            if (keys.d.pressed) {
+                this.velocity.x = 7;
+                this.facingRight = true;
+            } else if (keys.a.pressed) {
+                this.velocity.x = -7;
+                this.facingRight = false;
+            } else {
+                this.velocity.x = 0;
+            }
+
+            // --- Jump ---
+            if (keys.space.pressed && onGround) {
+                this.velocity.y = -18;
+            }
         }
 
         // --- Physics ---
@@ -153,7 +172,17 @@ class Player {
             this.velocity.x = 0;
         }
 
+        // --- Advance animation frame ---
         this.currentSprite.update();
+    }
+
+    startAttack() {
+        if (this.isAttacking) return;
+        this.isAttacking = true;
+        this.currentSprite = this.sprites.attack;
+        this.currentSprite.currentFrame = 0;
+        this.currentSprite.finished = false;
+        this.currentSprite.elapsedFrames = 0;
     }
 }
 
@@ -189,6 +218,13 @@ export default function Map() {
                 `/src/assets/sprites/the_knight/jump/Knight_jump_${String(i + 1).padStart(2, "0")}.png`,
         );
 
+        // --- Attack animation (11 frames): Knight_slash_left_longer0000.png ... 0010.png ---
+        const attackPaths = Array.from(
+            { length: 11 },
+            (_, i) =>
+                `/src/assets/sprites/the_knight/slash_left_longer/Knight_slash_left_longer${String(i).padStart(4, "0")}.png`,
+        );
+
         let sprites = null;
         let player = null;
 
@@ -203,14 +239,20 @@ export default function Map() {
             loadImages(idlePaths),
             loadImages(walkPaths),
             loadImages(jumpPaths),
+            loadImages(attackPaths),
         ])
-            .then(([idleImgs, walkImgs, jumpImgs]) => {
+            .then(([idleImgs, walkImgs, jumpImgs, attackImgs]) => {
                 sprites = {
                     idle: new Sprite({ images: idleImgs, frameBuffer: 10 }),
                     walk: new Sprite({ images: walkImgs, frameBuffer: 6 }),
                     jump: new Sprite({
                         images: jumpImgs,
                         frameBuffer: 4,
+                        loop: false,
+                    }),
+                    attack: new Sprite({
+                        images: attackImgs,
+                        frameBuffer: 3,
                         loop: false,
                     }),
                 };
@@ -220,7 +262,7 @@ export default function Map() {
                     velocity: { x: 0, y: 0 },
                     gravity: 0.8,
                     sprites,
-                    scale: 2, // double the size
+                    scale: 2, // 2x size
                 });
             })
             .catch((err) => {
@@ -255,8 +297,16 @@ export default function Map() {
             }
         }
 
+        function onMouseDown(e) {
+            // left mouse button only
+            if (e.button === 0 && player) {
+                player.startAttack();
+            }
+        }
+
         window.addEventListener("keydown", onKeyDown);
         window.addEventListener("keyup", onKeyUp);
+        window.addEventListener("mousedown", onMouseDown);
 
         function draw() {
             c.fillStyle = "black";
@@ -279,6 +329,7 @@ export default function Map() {
         return () => {
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
+            window.removeEventListener("mousedown", onMouseDown);
         };
     }, []);
 
