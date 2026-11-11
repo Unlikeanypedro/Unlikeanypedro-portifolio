@@ -24,7 +24,7 @@ export default function Intro({ onFinish }) {
     const closeTimer = useRef(null);
 
     const messages = t.intro.messages;
-    const isPrompt = step === messages.length - 1;
+    const isPrompt = step === messages.length;
 
     // Último Enter: fade de 3s até a tela inicial aparecer por baixo.
     const startFadeOut = useCallback(() => {
@@ -84,7 +84,8 @@ export default function Intro({ onFinish }) {
         const el = videoRef.current;
         if (!el || !el.paused) return;
         const attempt = el.play();
-        if (attempt && typeof attempt.catch === "function") attempt.catch(() => {});
+        if (attempt && typeof attempt.catch === "function")
+            attempt.catch(() => {});
     };
 
     // Enter avança as mensagens; na última, faz o fade para o menu.
