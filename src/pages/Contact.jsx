@@ -31,7 +31,7 @@ export default function Contact() {
                     reply_to: data.email,
                     message: data.message,
                 },
-                { publicKey: PUBLIC_KEY },
+                { publicKey: PUBLIC_KEY }
             );
             setStatus("ok");
             reset();
@@ -51,106 +51,136 @@ export default function Contact() {
             </header>
 
             <div className="contact">
-                <aside className="contact__channels">
-                    <h2>{t.contact.channels}</h2>
-                    <ul>
-                        {contactLinks.map((link) => (
-                            <li key={link.id}>
-                                <a
-                                    href={link.href}
-                                    target={
-                                        link.href.startsWith("http")
-                                            ? "_blank"
-                                            : undefined
-                                    }
-                                    rel="noreferrer"
-                                >
-                                    {link.label}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
-
-                <form
-                    className="form"
-                    onSubmit={handleSubmit(onSubmit)}
-                    noValidate
+                {/* Background animado: partículas estilo Hollow Knight */}
+                <div
+                    className="contact__bg-particles"
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        pointerEvents: "none",
+                        overflow: "hidden",
+                        zIndex: 0,
+                    }}
                 >
-                    <label>
-                        {t.contact.name}
-                        <input
-                            type="text"
-                            {...register("name", {
-                                required: t.contact.required,
-                            })}
-                        />
-                        {errors.name && (
-                            <span className="form__error">
-                                {errors.name.message}
-                            </span>
-                        )}
-                    </label>
+                    {/* Partículas isoladas */}
+                    <div
+                        style={{
+                            position: "absolute",
+                            width: "4px",
+                            height: "4px",
+                            background: "var(--accent)",
+                            borderRadius: "50%",
+                            opacity: 0.6,
+                            left: Math.random() * 100 + "%",
+                            top: Math.random() * 100 + "%",
+                            animation: "floatParticle 20s ease-in-out infinite",
+                        }}
+                        key={Math.random()}
+                    ></div>
+                </div>
 
-                    <label>
-                        {t.contact.email}
-                        <input
-                            type="email"
-                            {...register("email", {
-                                required: t.contact.required,
-                                pattern: {
-                                    value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
-                                    message: t.contact.invalidEmail,
-                                },
-                            })}
-                        />
-                        {errors.email && (
-                            <span className="form__error">
-                                {errors.email.message}
-                            </span>
-                        )}
-                    </label>
+                <div className="contact" style={{ position: "relative", zIndex: 1 }}>
+                    <aside className="contact__channels">
+                        <h2>{t.contact.channels}</h2>
+                        <ul>
+                            {contactLinks.map((link) => (
+                                <li key={link.id}>
+                                    <a
+                                        href={link.href}
+                                        target={
+                                            link.href.startsWith("http")
+                                                ? "_blank"
+                                                : undefined
+                                        }
+                                        rel="noreferrer"
+                                    >
+                                        {link.label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </aside>
 
-                    <label>
-                        {t.contact.message}
-                        <textarea
-                            rows={5}
-                            {...register("message", {
-                                required: t.contact.required,
-                                minLength: {
-                                    value: 10,
-                                    message: t.contact.minMessage,
-                                },
-                            })}
-                        />
-                        {errors.message && (
-                            <span className="form__error">
-                                {errors.message.message}
-                            </span>
-                        )}
-                    </label>
-
-                    <button
-                        className="btn"
-                        type="submit"
-                        disabled={status === "sending"}
+                    <form
+                        className="form"
+                        onSubmit={handleSubmit(onSubmit)}
+                        noValidate
                     >
-                        {status === "sending"
-                            ? t.contact.sending
-                            : t.contact.send}
-                    </button>
+                        <label>
+                            {t.contact.name}
+                            <input
+                                type="text"
+                                {...register("name", {
+                                    required: t.contact.required,
+                                })}
+                            />
+                            {errors.name && (
+                                <span className="form__error">
+                                    {errors.name.message}
+                                </span>
+                            )}
+                        </label>
 
-                    {status === "ok" && (
-                        <p className="form__status form__status--ok">
-                            {t.contact.success}
-                        </p>
-                    )}
-                    {status === "err" && (
-                        <p className="form__status form__status--err">
-                            {t.contact.error}
-                        </p>
-                    )}
-                </form>
+                        <label>
+                            {t.contact.email}
+                            <input
+                                type="email"
+                                {...register("email", {
+                                    required: t.contact.required,
+                                    pattern: {
+                                        value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+                                        message: t.contact.invalidEmail,
+                                    },
+                                })}
+                            />
+                            {errors.email && (
+                                <span className="form__error">
+                                    {errors.email.message}
+                                </span>
+                            )}
+                        </label>
+
+                        <label>
+                            {t.contact.message}
+                            <textarea
+                                rows={5}
+                                {...register("message", {
+                                    required: t.contact.required,
+                                    minLength: {
+                                        value: 10,
+                                        message: t.contact.minMessage,
+                                    },
+                                })}
+                            />
+                            {errors.message && (
+                                <span className="form__error">
+                                    {errors.message.message}
+                                </span>
+                            )}
+                        </label>
+
+                        <button
+                            className="btn"
+                            type="submit"
+                            disabled={status === "sending"}
+                        >
+                            {status === "sending"
+                                ? t.contact.sending
+                                : t.contact.send}
+                        </button>
+
+                        {status === "ok" && (
+                            <p className="form__status form__status--ok">
+                                {t.contact.success}
+                            </p>
+                        )}
+                        {status === "err" && (
+                            <p className="form__status form__status--err">
+                                {t.contact.error}
+                            </p>
+                        )}
+                    </form>
+                </div>
             </div>
         </div>
     );

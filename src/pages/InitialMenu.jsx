@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import bgImage from "../assets/videos/bg/1794367472683.jpg";
@@ -26,28 +27,69 @@ function Butterfly() {
     );
 }
 
+// Mapeamento de rótulos para cada item do menu (PT / EN)
+const menuLabels = {
+    pt: ["jogar", "sobre", "projetos", "experiência", "contato"],
+    en: ["play", "about", "projects", "experience", "contact"],
+};
+
+// Rotas de cada item do menu (as mesmas nos dois idiomas)
+const itemTo = {
+    pt: ["/mapa", "/sobre", "/projetos", "/experiencias", "/contato"],
+    en: ["/mapa", "/sobre", "/projetos", "/experiencias", "/contato"],
+};
+
+// Ícones decorativos ao lado de cada item (usando SVG do Hollow Knight estilo)
+const menuIcons = [
+    { pt: "🐞", en: "🪲" },
+    { pt: "ℹ️", en: "ℹ️" },
+    { pt: "📁", en: "📁" },
+    { pt: "⏳", en: "⏳" },
+    { pt: "✉️", en: "✉️" },
+];
+
 export default function InitialMenu() {
     const { lang, t } = useLanguage();
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
-    const items =
-        lang === "pt"
-            ? [
-                  { label: "jogar", to: "/mapa" },
-                  { label: "sobre", to: "/sobre" },
-                  { label: "projetos", to: "/projetos" },
-                  { label: "experiência", to: "/experiencias" },
-                  { label: "contato", to: "/contato" },
-              ]
-            : [
-                  { label: "play", to: "/mapa" },
-                  { label: "about", to: "/sobre" },
-                  { label: "projects", to: "/projetos" },
-                  { label: "experience", to: "/experiencias" },
-                  { label: "contact", to: "/contato" },
-              ];
+    const items = itemTo[lang].map((to, i) => ({
+        to,
+        label: menuLabels[lang][i],
+    }));
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            switch (e.key) {
+                case "ArrowDown":
+                case "ArrowUp": {
+                    e.preventDefault();
+                    const step = 1;
+                    const max = items.length - 1;
+                    let next = selectedIndex;
+                    if (e.key === "ArrowDown") {
+                        next = Math.min(selectedIndex + step, max);
+                    } else {
+                        next = Math.max(selectedIndex - step, 0);
+                    }
+                    if (next !== selectedIndex) {
+                        setSelectedIndex(next);
+                    }
+                    break;
+                }
+                case "Enter": {
+                    e.preventDefault();
+                    const target = items[selectedIndex].to;
+                    window.location.href = target;
+                    break;
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [selectedIndex, items.length]);
 
     return (
-        <div className="initial-menu">
+        <div className="initial-menu" style={{ overflowY: "auto" }}>
             <div
                 className="initial-menu__bg"
                 style={{ backgroundImage: `url(${bgImage})` }}
@@ -77,17 +119,22 @@ export default function InitialMenu() {
                     <span className="menu-title-card__eyebrow">
                         {lang === "pt" ? "Portfólio" : "Portfolio"}
                     </span>
-                    <h1>Pedro Oliveira</h1>
+                    <h1 style={{ fontSize: "clamp(3.6rem, 6.8vw, 5.2rem)", margin: "0.5rem 0 1.2rem" }}>
+                        Pedro Oliveira
+                    </h1>
                     <Ornament className="menu-title-card__ornament" />
                     <p className="menu-title-card__role">{t.about.role}</p>
                 </section>
 
                 <nav className="menu-nav-card" aria-label="Navegação principal">
-                    {items.map((item) => (
+                    {items.map((item, i) => (
                         <Link
                             key={item.to}
                             to={item.to}
-                            className="menu-item"
+                            className={`menu-item ${selectedIndex === i ? "is-active" : ""}`}
+                            style={{
+                                textShadow: selectedIndex === i ? "var(--glow)" : "0 1px 10px rgba(0,0,0,0.85)",
+                            }}
                         >
                             <span className="menu-item__bullet">✦</span>
                             {item.label}

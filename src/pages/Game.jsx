@@ -334,16 +334,18 @@ export default function Map() {
     }, []);
 
     return (
-        <div className="mapa-rect" style={{ width: "100%", height: "100vh" }}>
+        <div className="mapa-rect">
             <canvas
                 ref={canvasRef}
                 width={1024}
                 height={576}
                 style={{
-                    border: "2px solid white",
+                    border: "1px solid var(--line)",
                     display: "block",
                     margin: "0 auto",
-                    background: "#111",
+                    background: "#07090f",
+                    maxWidth: "100%",
+                    height: "auto",
                 }}
             />
         </div>
