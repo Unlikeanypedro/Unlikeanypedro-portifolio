@@ -68,8 +68,8 @@ const loadImages = async (paths) => {
     return imgs;
 };
 
-// Sprites passam pelo bundler: em produção os arquivos são publicados com hash
-// em /assets/, então caminhos fixos "/src/..." dariam 404.
+// Sprites e cenário passam pelo bundler: em produção os arquivos são publicados
+// com hash em /assets/, então caminhos fixos "/src/..." dariam 404.
 const idleSprites = import.meta.glob(
     "../assets/sprites/the_knight/idle_still/*.png",
     { eager: true, query: "?url", import: "default" },
@@ -88,6 +88,11 @@ const attackSprites = import.meta.glob(
     "../assets/sprites/the_knight/slash_left_longer/*.png",
     { eager: true, query: "?url", import: "default" },
 );
+const backgroundImages = import.meta.glob("../assets/images/bg-game/*", {
+    eager: true,
+    query: "?url",
+    import: "default",
+});
 
 // Ordena pelos nomes (todos os frames são numerados com zero à esquerda).
 const spriteUrls = (modules) =>
@@ -110,7 +115,7 @@ class Player {
         this.isAttacking = false;
     }
 
-    draw(c) {
+    draw(c, cameraX = 0) {
         const sprite = this.currentSprite;
         const img = sprite.images[sprite.currentFrame];
 
@@ -127,14 +132,17 @@ class Player {
         }
 
         // center vertically on the collision box so it feels planted
-        const drawX = this.position.x;
+        const drawX = this.position.x - cameraX;
         const drawY = this.position.y + (this.height - drawHeight) / 2;
 
         sprite.draw(c, drawX, drawY, drawWidth, drawHeight, this.facingRight);
     }
 
-    update(keys, canvasWidth, canvasHeight) {
+    update(keys, worldWidth, canvasHeight) {
         const onGround = this.position.y + this.height >= canvasHeight - 30;
+        const goRight = keys.d.pressed || keys.right.pressed;
+        const goLeft = keys.a.pressed || keys.left.pressed;
+        const jump = keys.space.pressed || keys.up.pressed;
 
         // --- Attack takes absolute priority ---
         if (this.isAttacking) {
@@ -154,7 +162,7 @@ class Player {
             if (!onGround) {
                 // in air -> jump animation
                 this.currentSprite = this.sprites.jump;
-            } else if (keys.d.pressed || keys.a.pressed) {
+            } else if (goRight || goLeft) {
                 // moving on ground -> walk animation
                 this.currentSprite = this.sprites.walk;
             } else {
@@ -163,10 +171,10 @@ class Player {
             }
 
             // --- Horizontal movement ---
-            if (keys.d.pressed) {
+            if (goRight) {
                 this.velocity.x = 7;
                 this.facingRight = true;
-            } else if (keys.a.pressed) {
+            } else if (goLeft) {
                 this.velocity.x = -7;
                 this.facingRight = false;
             } else {
@@ -174,7 +182,7 @@ class Player {
             }
 
             // --- Jump ---
-            if (keys.space.pressed && onGround) {
+            if (jump && onGround) {
                 this.velocity.y = -18;
             }
         }
@@ -190,13 +198,13 @@ class Player {
             this.velocity.y = 0;
         }
 
-        // --- Wall collision ---
+        // --- World bounds (o mapa é mais largo que a tela) ---
         if (this.position.x < 0) {
             this.position.x = 0;
             this.velocity.x = 0;
         }
-        if (this.position.x + this.width > canvasWidth) {
-            this.position.x = canvasWidth - this.width;
+        if (this.position.x + this.width > worldWidth) {
+            this.position.x = worldWidth - this.width;
             this.velocity.x = 0;
         }
 
@@ -223,30 +231,76 @@ export default function Map() {
 
         const c = canvas.getContext("2d");
 
-        // O canvas ocupa a viewport inteira; a física usa o tamanho atual.
+        let loadError = false;
+        let sprites = null;
+        let player = null;
+
+        // Cenário: as duas imagens alternadas em sequência, cada uma com a
+        // altura da tela, formando um mapa contínuo maior que a viewport.
+        let bgImages = [];
+        let tiles = [];
+        let worldWidth = 0;
+        let cameraX = 0;
+
+        const keys = {
+            space: { pressed: false },
+            up: { pressed: false },
+            a: { pressed: false },
+            d: { pressed: false },
+            left: { pressed: false },
+            right: { pressed: false },
+        };
+
+        // Monta o mapa: repete as imagens até cobrir 3x a largura da tela,
+        // garantindo espaço para a câmera acompanhar o ghost.
+        const buildWorld = () => {
+            if (!bgImages.length) return;
+
+            tiles = [];
+            let x = 0;
+            let i = 0;
+            const targetWidth = Math.max(canvas.width * 3, canvas.width + 1);
+
+            while (x < targetWidth) {
+                const img = bgImages[i % bgImages.length];
+                const width = canvas.height * (img.naturalWidth / img.naturalHeight);
+                tiles.push({ img, x, width });
+                x += width;
+                i++;
+            }
+
+            worldWidth = x;
+        };
+
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         };
+
+        const handleResize = () => {
+            resizeCanvas();
+            buildWorld();
+            if (player) {
+                player.position.x = Math.max(
+                    0,
+                    Math.min(player.position.x, worldWidth - player.width),
+                );
+                cameraX = Math.max(
+                    0,
+                    Math.min(cameraX, worldWidth - canvas.width),
+                );
+            }
+        };
+
         resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("resize", handleResize);
 
         // --- Frames de cada animação (resolvidos pelo bundler) ---
         const idlePaths = spriteUrls(idleSprites);
         const walkPaths = spriteUrls(walkSprites);
         const jumpPaths = spriteUrls(jumpSprites);
         const attackPaths = spriteUrls(attackSprites);
-
-        let loadError = false;
-
-        let sprites = null;
-        let player = null;
-
-        const keys = {
-            space: { pressed: false },
-            a: { pressed: false },
-            d: { pressed: false },
-        };
+        const bgPaths = spriteUrls(backgroundImages);
 
         // Load all images first, then start the loop
         Promise.all([
@@ -254,8 +308,9 @@ export default function Map() {
             loadImages(walkPaths),
             loadImages(jumpPaths),
             loadImages(attackPaths),
+            loadImages(bgPaths),
         ])
-            .then(([idleImgs, walkImgs, jumpImgs, attackImgs]) => {
+            .then(([idleImgs, walkImgs, jumpImgs, attackImgs, bgImgs]) => {
                 sprites = {
                     idle: new Sprite({ images: idleImgs, frameBuffer: 10 }),
                     walk: new Sprite({ images: walkImgs, frameBuffer: 6 }),
@@ -271,6 +326,9 @@ export default function Map() {
                     }),
                 };
 
+                bgImages = bgImgs;
+                buildWorld();
+
                 player = new Player({
                     position: { x: 100, y: 200 },
                     velocity: { x: 0, y: 0 },
@@ -278,6 +336,17 @@ export default function Map() {
                     sprites,
                     scale: 2, // 2x size
                 });
+
+                // Começa com a câmera já enquadrada no ghost.
+                cameraX = Math.max(
+                    0,
+                    Math.min(
+                        player.position.x +
+                            player.width / 2 -
+                            canvas.width / 2,
+                        worldWidth - canvas.width,
+                    ),
+                );
             })
             .catch((err) => {
                 console.error("Sprite load error:", err);
@@ -287,13 +356,22 @@ export default function Map() {
         function onKeyDown(e) {
             switch (e.key) {
                 case " ":
+                case "ArrowUp":
+                    e.preventDefault();
                     keys.space.pressed = true;
+                    keys.up.pressed = true;
                     break;
                 case "a":
+                case "ArrowLeft":
+                    e.preventDefault();
                     keys.a.pressed = true;
+                    keys.left.pressed = true;
                     break;
                 case "d":
+                case "ArrowRight":
+                    e.preventDefault();
                     keys.d.pressed = true;
+                    keys.right.pressed = true;
                     break;
             }
         }
@@ -301,13 +379,19 @@ export default function Map() {
         function onKeyUp(e) {
             switch (e.key) {
                 case " ":
+                case "ArrowUp":
                     keys.space.pressed = false;
+                    keys.up.pressed = false;
                     break;
                 case "a":
+                case "ArrowLeft":
                     keys.a.pressed = false;
+                    keys.left.pressed = false;
                     break;
                 case "d":
+                case "ArrowRight":
                     keys.d.pressed = false;
+                    keys.right.pressed = false;
                     break;
             }
         }
@@ -324,21 +408,53 @@ export default function Map() {
         window.addEventListener("mousedown", onMouseDown);
 
         function draw() {
-            c.fillStyle = "black";
+            c.fillStyle = "#07090f";
             c.fillRect(0, 0, canvas.width, canvas.height);
 
             if (player) {
-                player.update(keys, canvas.width, canvas.height);
-                player.draw(c);
+                player.update(keys, worldWidth, canvas.height);
+
+                // Câmera segue o ghost e fica presa aos limites do mapa.
+                const targetCamera = Math.max(
+                    0,
+                    Math.min(
+                        player.position.x +
+                            player.width / 2 -
+                            canvas.width / 2,
+                        worldWidth - canvas.width,
+                    ),
+                );
+                cameraX += (targetCamera - cameraX) * 0.15;
+                if (Math.abs(targetCamera - cameraX) < 0.5) {
+                    cameraX = targetCamera;
+                }
+
+                // Fundo rolável (o mapa passa enquanto o ghost anda).
+                for (const tile of tiles) {
+                    const screenX = tile.x - cameraX;
+                    if (screenX > canvas.width || screenX + tile.width < 0) {
+                        continue;
+                    }
+                    c.drawImage(
+                        tile.img,
+                        screenX,
+                        0,
+                        tile.width,
+                        canvas.height,
+                    );
+                }
+
+                player.draw(c, cameraX);
             } else {
                 c.fillStyle = "white";
                 c.font = "20px sans-serif";
+                c.textAlign = "center";
                 c.fillText(
                     loadError
                         ? "Falha ao carregar sprites"
                         : "Loading sprites...",
-                    400,
-                    280,
+                    canvas.width / 2,
+                    canvas.height / 2,
                 );
             }
 
@@ -351,7 +467,7 @@ export default function Map() {
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
             window.removeEventListener("mousedown", onMouseDown);
-            window.removeEventListener("resize", resizeCanvas);
+            window.removeEventListener("resize", handleResize);
         };
     }, []);
 
