@@ -13,12 +13,13 @@ export default function App() {
         <LanguageProvider>
             <Routes>
                 <Route path="/" element={<InitialMenu />} />
+                {/* O jogo fica fora do layout: o canvas ocupa a viewport inteira. */}
+                <Route path="mapa" element={<Map />} />
                 <Route element={<Layout />}>
                     <Route path="sobre" element={<About />} />
                     <Route path="projetos" element={<Projects />} />
                     <Route path="experiencias" element={<Experiences />} />
                     <Route path="contato" element={<Contact />} />
-                    <Route path="mapa" element={<Map />} />
                     <Route path="*" element={<About />} />
                 </Route>
             </Routes>

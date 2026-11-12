@@ -59,7 +59,7 @@ export const translations = {
             invalidEmail: "Informe um e-mail válido",
             minMessage: "A mensagem precisa ter ao menos 10 caracteres",
         },
-        footer: "Todos os direitos reservados.",
+        footer: "Todos os direitos reservados. Creditos de estilo a TEAM CHERRY",
     },
     en: {
         nav: {
@@ -118,6 +118,6 @@ export const translations = {
             invalidEmail: "Enter a valid email",
             minMessage: "Message must have at least 10 characters",
         },
-        footer: "All rights reserved.",
+        footer: "All rights reserved. Style credtis to TEAM CHERRY",
     },
 };

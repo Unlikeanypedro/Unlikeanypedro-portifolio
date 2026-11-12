@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 /**
  * Sprite class — handles frame-based animation from an array of images.
@@ -221,8 +222,14 @@ export default function Map() {
         if (!canvas) return;
 
         const c = canvas.getContext("2d");
-        canvas.width = 1024;
-        canvas.height = 576;
+
+        // O canvas ocupa a viewport inteira; a física usa o tamanho atual.
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
 
         // --- Frames de cada animação (resolvidos pelo bundler) ---
         const idlePaths = spriteUrls(idleSprites);
@@ -344,24 +351,16 @@ export default function Map() {
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
             window.removeEventListener("mousedown", onMouseDown);
+            window.removeEventListener("resize", resizeCanvas);
         };
     }, []);
 
     return (
         <div className="mapa-rect">
-            <canvas
-                ref={canvasRef}
-                width={1024}
-                height={576}
-                style={{
-                    border: "1px solid var(--line)",
-                    display: "block",
-                    margin: "0 auto",
-                    background: "#07090f",
-                    maxWidth: "100%",
-                    height: "auto",
-                }}
-            />
+            <canvas ref={canvasRef} className="mapa-canvas" />
+            <Link to="/" className="game-back" aria-label="Voltar ao início">
+                ← início
+            </Link>
         </div>
     );
 }

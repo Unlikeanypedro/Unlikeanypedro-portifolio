@@ -1520,11 +1520,41 @@ button {
     text-shadow: var(--glow);
 }
 
-/* --- Mapa --- */
+/* --- Mapa (jogo em tela cheia) --- */
 .mapa-rect {
+    position: fixed;
+    inset: 0;
+    background: #07090f;
+    overflow: hidden;
+}
+
+.mapa-canvas {
+    display: block;
     width: 100%;
-    display: flex;
-    justify-content: center;
+    height: 100%;
+    background: #07090f;
+}
+
+.game-back {
+    position: fixed;
+    top: clamp(0.75rem, 2vh, 1.25rem);
+    left: clamp(0.75rem, 2vw, 1.25rem);
+    font-family: var(--label);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--line);
+    background: rgba(4, 5, 9, 0.6);
+    transition:
+        color 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.game-back:hover {
+    color: var(--ink);
+    border-color: var(--accent);
 }
 
 @media (max-width: 1000px) {
