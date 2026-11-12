@@ -67,6 +67,33 @@ const loadImages = async (paths) => {
     return imgs;
 };
 
+// Sprites passam pelo bundler: em produção os arquivos são publicados com hash
+// em /assets/, então caminhos fixos "/src/..." dariam 404.
+const idleSprites = import.meta.glob(
+    "../assets/sprites/the_knight/idle_still/*.png",
+    { eager: true, query: "?url", import: "default" },
+);
+const walkSprites = import.meta.glob("../assets/sprites/the_knight/walk/*.png", {
+    eager: true,
+    query: "?url",
+    import: "default",
+});
+const jumpSprites = import.meta.glob("../assets/sprites/the_knight/jump/*.png", {
+    eager: true,
+    query: "?url",
+    import: "default",
+});
+const attackSprites = import.meta.glob(
+    "../assets/sprites/the_knight/slash_left_longer/*.png",
+    { eager: true, query: "?url", import: "default" },
+);
+
+// Ordena pelos nomes (todos os frames são numerados com zero à esquerda).
+const spriteUrls = (modules) =>
+    Object.keys(modules)
+        .sort()
+        .map((key) => modules[key]);
+
 class Player {
     constructor({ position, velocity, gravity, sprites, scale = 1 }) {
         this.position = position;
@@ -197,33 +224,13 @@ export default function Map() {
         canvas.width = 1024;
         canvas.height = 576;
 
-        // --- Idle still animation (9 frames): Knight_idle_still_020000.png ... 020008.png ---
-        const idlePaths = Array.from(
-            { length: 9 },
-            (_, i) =>
-                `/src/assets/sprites/the_knight/idle_still/Knight_idle_still_020${String(i).padStart(3, "0")}.png`,
-        );
+        // --- Frames de cada animação (resolvidos pelo bundler) ---
+        const idlePaths = spriteUrls(idleSprites);
+        const walkPaths = spriteUrls(walkSprites);
+        const jumpPaths = spriteUrls(jumpSprites);
+        const attackPaths = spriteUrls(attackSprites);
 
-        // --- Walk animation (8 frames): Knight_walk0000.png ... Knight_walk0007.png ---
-        const walkPaths = Array.from(
-            { length: 8 },
-            (_, i) =>
-                `/src/assets/sprites/the_knight/walk/Knight_walk${String(i).padStart(4, "0")}.png`,
-        );
-
-        // --- Jump animation (6 frames): Knight_jump_01.png ... Knight_jump_06.png ---
-        const jumpPaths = Array.from(
-            { length: 6 },
-            (_, i) =>
-                `/src/assets/sprites/the_knight/jump/Knight_jump_${String(i + 1).padStart(2, "0")}.png`,
-        );
-
-        // --- Attack animation (11 frames): Knight_slash_left_longer0000.png ... 0010.png ---
-        const attackPaths = Array.from(
-            { length: 11 },
-            (_, i) =>
-                `/src/assets/sprites/the_knight/slash_left_longer/Knight_slash_left_longer${String(i).padStart(4, "0")}.png`,
-        );
+        let loadError = false;
 
         let sprites = null;
         let player = null;
@@ -267,6 +274,7 @@ export default function Map() {
             })
             .catch((err) => {
                 console.error("Sprite load error:", err);
+                loadError = true;
             });
 
         function onKeyDown(e) {
@@ -318,7 +326,13 @@ export default function Map() {
             } else {
                 c.fillStyle = "white";
                 c.font = "20px sans-serif";
-                c.fillText("Loading sprites...", 400, 280);
+                c.fillText(
+                    loadError
+                        ? "Falha ao carregar sprites"
+                        : "Loading sprites...",
+                    400,
+                    280,
+                );
             }
 
             window.requestAnimationFrame(draw);
