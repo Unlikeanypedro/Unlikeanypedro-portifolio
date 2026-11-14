@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLanguage, useGithubProjects } from "../context/LanguageContext.jsx";
 import Ornament from "../components/Ornament.jsx";
 import { projects } from "../data/projects.js";
+import { initialsOf } from "../utils/text.js";
 
 // Canto ornamental da moldura (mesmo motivo do Diário do Hollow Knight).
 function CornerFlourish({ className }) {
@@ -23,17 +24,6 @@ function CornerFlourish({ className }) {
             <circle cx="8" cy="46" r="1.6" fill="currentColor" stroke="none" />
         </svg>
     );
-}
-
-function initialsOf(name) {
-    return name
-        .replace(/[^\p{L}\p{N} ]/gu, "")
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((word) => word[0])
-        .join("")
-        .toUpperCase();
 }
 
 export default function Projects() {
