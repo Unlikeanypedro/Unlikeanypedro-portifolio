@@ -1715,6 +1715,7 @@ button {
     position: fixed;
     top: clamp(0.75rem, 2vh, 1.25rem);
     left: clamp(0.75rem, 2vw, 1.25rem);
+    z-index: 6;
     font-family: var(--label);
     font-size: 0.72rem;
     letter-spacing: 0.18em;

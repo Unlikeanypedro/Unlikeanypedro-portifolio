@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import bgImage from "../assets/videos/bg/1794367472683.jpg";
 import Ornament from "../components/Ornament.jsx";
@@ -26,6 +26,7 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 export default function GameScreen() {
     const { lang, t } = useLanguage();
+    const navigate = useNavigate();
 
     const canvasRef = useRef(null);
     const worldRef = useRef(null);
@@ -95,11 +96,22 @@ export default function GameScreen() {
                 }
                 event.preventDefault();
                 setPopupPage(nearbyRef.current);
+            } else if (event.key === "Escape") {
+                // Com um painel aberto, o Esc fecha o painel; fora disso,
+                // volta para o menu inicial.
+                if (
+                    popupOpenRef.current ||
+                    inventoryOpenRef.current
+                ) {
+                    return;
+                }
+                event.preventDefault();
+                navigate("/");
             }
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
