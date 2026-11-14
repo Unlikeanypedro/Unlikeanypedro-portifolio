@@ -1,17 +1,10 @@
 # Pedro Oliveira | Portfólio Profissional
 
-> TODO: use o template oficial da disciplina e cole as seções abaixo dentro dele:
-> https://github.com/joaopauloaramuni/desenvolvimento-e-integracao-de-aplicacoes-web/blob/main/TEMPLATES/template_README.md
-
 ## Descrição
 Website de portfólio profissional com as seções Sobre mim (PT/EN), Projetos (timeline), Experiências e Contato.
 
-## Protótipos (Figma)
-<!-- TODO: exporte os wireframes e salve em docs/wireframes/ -->
-![Wireframe - Sobre mim](docs/wireframes/sobre.png)
-![Wireframe - Projetos](docs/wireframes/projetos.png)
-![Wireframe - Experiências](docs/wireframes/experiencias.png)
-![Wireframe - Contato](docs/wireframes/contato.png)
+## LInk Website
+[Portifolio](https://unlikeanypedro-portifolio.vercel.app/)
 
 ## Tecnologias
 React 19, Vite, React Router, React Hook Form, EmailJS, CSS puro.
