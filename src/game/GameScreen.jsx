@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import bgImage from "../assets/videos/bg/1794367472683.jpg";
 import Ornament from "../components/Ornament.jsx";
 import Inventory from "./Inventory.jsx";
+import PagePopup from "./PagePopup.jsx";
 import { loadImages, spritePaths } from "./assets.js";
 import { Sprite } from "./Sprite.js";
 import { Player } from "./Player.js";
@@ -17,6 +18,10 @@ const SPRITE_SETTINGS = {
     attack: { frameBuffer: 3, loop: false },
 };
 
+// Distância horizontal (px) do centro do card da página em que o ghost já
+// pode interagir.
+const CARD_REACH = 140;
+
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 export default function GameScreen() {
@@ -25,10 +30,14 @@ export default function GameScreen() {
     const canvasRef = useRef(null);
     const worldRef = useRef(null);
     const inventoryOpenRef = useRef(false);
+    const popupOpenRef = useRef(false);
+    const nearbyRef = useRef(null);
 
     const [worldWidth, setWorldWidth] = useState(2400);
     const [activeZone, setActiveZone] = useState(0);
+    const [nearby, setNearby] = useState(null);
     const [inventoryOpen, setInventoryOpen] = useState(false);
+    const [popupPage, setPopupPage] = useState(null);
     const [status, setStatus] = useState("loading");
 
     const zones = [
@@ -62,15 +71,30 @@ export default function GameScreen() {
         inventoryOpenRef.current = inventoryOpen;
     }, [inventoryOpen]);
 
-    // "I" abre e fecha o inventário de projetos.
+    useEffect(() => {
+        popupOpenRef.current = popupPage !== null;
+    }, [popupPage]);
+
+    // Teclado da tela: "I" abre o inventário, "E" abre a página próxima.
     useEffect(() => {
         const onKeyDown = (event) => {
             if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) {
                 return;
             }
             if (event.key === "i" || event.key === "I") {
+                if (popupOpenRef.current) return;
                 event.preventDefault();
                 setInventoryOpen((open) => !open);
+            } else if (event.key === "e" || event.key === "E") {
+                if (
+                    popupOpenRef.current ||
+                    inventoryOpenRef.current ||
+                    nearbyRef.current === null
+                ) {
+                    return;
+                }
+                event.preventDefault();
+                setPopupPage(nearbyRef.current);
             }
         };
         window.addEventListener("keydown", onKeyDown);
@@ -97,6 +121,14 @@ export default function GameScreen() {
         let frame = 0;
         let disposed = false;
 
+        // Mantém o estado do React e a ref (usada pelo loop e pelos eventos)
+        // sempre iguais, sem re-renderizar a cada quadro.
+        const syncNearby = (value) => {
+            if (nearbyRef.current === value) return;
+            nearbyRef.current = value;
+            setNearby(value);
+        };
+
         const resize = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -113,11 +145,7 @@ export default function GameScreen() {
                     player.position.y = level.floorY - player.height;
                     player.velocity.y = 0;
                 }
-                cameraX = clamp(
-                    cameraX,
-                    0,
-                    level.worldWidth - canvas.width,
-                );
+                cameraX = clamp(cameraX, 0, level.worldWidth - canvas.width);
             }
         };
 
@@ -139,10 +167,7 @@ export default function GameScreen() {
                 });
 
                 player = new Player({
-                    position: {
-                        x: SPAWN_X,
-                        y: level.floorY - 100,
-                    },
+                    position: { x: SPAWN_X, y: level.floorY - 100 },
                     velocity: { x: 0, y: 0 },
                     gravity: 0.8,
                     sprites,
@@ -150,9 +175,7 @@ export default function GameScreen() {
                 });
 
                 cameraX = clamp(
-                    player.position.x +
-                        player.width / 2 -
-                        canvas.width / 2,
+                    player.position.x + player.width / 2 - canvas.width / 2,
                     0,
                     level.worldWidth - canvas.width,
                 );
@@ -206,15 +229,17 @@ export default function GameScreen() {
             }
         };
 
-        // O clique continua sendo o ataque do ghost (funcionalidade anterior).
+        // Perto de um card: o clique abre a página. Caso contrário, o clique
+        // continua sendo o ataque do ghost.
         const onMouseDown = (event) => {
-            if (
-                event.button === 0 &&
-                player &&
-                !inventoryOpenRef.current
-            ) {
-                player.startAttack();
+            if (event.button !== 0 || event.target !== canvas) return;
+            if (inventoryOpenRef.current || popupOpenRef.current) return;
+
+            if (nearbyRef.current !== null) {
+                setPopupPage(nearbyRef.current);
+                return;
             }
+            if (player) player.startAttack();
         };
 
         window.addEventListener("keydown", onKeyDown);
@@ -225,15 +250,16 @@ export default function GameScreen() {
             c.clearRect(0, 0, canvas.width, canvas.height);
 
             if (player && level) {
-                // Inventário aberto = jogo pausado.
-                if (!inventoryOpenRef.current) {
+                // Inventário ou pop-up aberto = jogo pausado.
+                const paused =
+                    inventoryOpenRef.current || popupOpenRef.current;
+
+                if (!paused) {
                     player.update(keys, level);
                 }
 
                 const targetCamera = clamp(
-                    player.position.x +
-                        player.width / 2 -
-                        canvas.width / 2,
+                    player.position.x + player.width / 2 - canvas.width / 2,
                     0,
                     level.worldWidth - canvas.width,
                 );
@@ -246,19 +272,36 @@ export default function GameScreen() {
                     worldRef.current.style.transform = `translate3d(${-cameraX}px, 0, 0)`;
                 }
 
-                drawWorld(c, level, cameraX, canvas.width);
-                player.draw(c, cameraX);
-
                 const zone = clamp(
-                    Math.floor(
-                        (cameraX + canvas.width / 2) / level.zoneWidth,
-                    ),
+                    Math.floor((cameraX + canvas.width / 2) / level.zoneWidth),
                     0,
                     ZONE_COUNT - 1,
                 );
                 setActiveZone((current) =>
                     current === zone ? current : zone,
                 );
+
+                // Interação: em cima de um bloco ou perto do card da sala.
+                const playerCenter = player.position.x + player.width / 2;
+                const playerZone = clamp(
+                    Math.floor(playerCenter / level.zoneWidth),
+                    0,
+                    ZONE_COUNT - 1,
+                );
+
+                let interact = null;
+                if (player.standingOn) {
+                    interact = player.standingOn.zone;
+                } else if (player.onGround) {
+                    const cardX = level.zoneWidth * (playerZone + 0.5);
+                    if (Math.abs(playerCenter - cardX) <= CARD_REACH) {
+                        interact = playerZone;
+                    }
+                }
+                syncNearby(interact);
+
+                drawWorld(c, level, cameraX, canvas.width, nearbyRef.current);
+                player.draw(c, cameraX);
             }
 
             if (!disposed) frame = window.requestAnimationFrame(draw);
@@ -275,6 +318,8 @@ export default function GameScreen() {
             window.removeEventListener("mousedown", onMouseDown);
         };
     }, []);
+
+    const overlayOpen = inventoryOpen || popupPage !== null;
 
     return (
         <div className="game-screen">
@@ -294,7 +339,13 @@ export default function GameScreen() {
                 {zones.map((zone, i) => (
                     <section
                         key={zone.key}
-                        className={`game-zone ${activeZone === i ? "is-active" : ""}`}
+                        className={[
+                            "game-zone",
+                            activeZone === i ? "is-active" : "",
+                            nearby === i && !overlayOpen ? "is-near" : "",
+                        ]
+                            .join(" ")
+                            .trim()}
                         style={{ left: `${((i + 0.5) * 100) / ZONE_COUNT}%` }}
                         aria-hidden={activeZone !== i}
                     >
@@ -304,6 +355,9 @@ export default function GameScreen() {
                         <h2 className="game-zone__title">{zone.title}</h2>
                         <Ornament className="game-zone__ornament" />
                         <p className="game-zone__note">{zone.note}</p>
+                        <span className="game-zone__interact">
+                            <kbd>e</kbd> {lang === "pt" ? "abrir" : "open"}
+                        </span>
                     </section>
                 ))}
             </div>
@@ -326,6 +380,19 @@ export default function GameScreen() {
                 ← início
             </Link>
 
+            {nearby !== null && !overlayOpen && (
+                <div className="game-prompt" aria-live="polite">
+                    <kbd>e</kbd>
+                    <span>
+                        {lang === "pt" ? "abrir" : "open"}{" "}
+                        <strong>{zones[nearby].title}</strong>
+                    </span>
+                    <span className="game-prompt__hint">
+                        {lang === "pt" ? "ou clique" : "or click"}
+                    </span>
+                </div>
+            )}
+
             <div className="game-hud">
                 <span>
                     <kbd>←</kbd>
@@ -333,6 +400,9 @@ export default function GameScreen() {
                 </span>
                 <span>
                     <kbd>espaço</kbd> {lang === "pt" ? "pular" : "jump"}
+                </span>
+                <span>
+                    <kbd>e</kbd> {lang === "pt" ? "interagir" : "interact"}
                 </span>
                 <span>
                     <kbd>i</kbd> {lang === "pt" ? "inventário" : "inventory"}
@@ -344,6 +414,12 @@ export default function GameScreen() {
                 onClose={() => setInventoryOpen(false)}
                 lang={lang}
                 t={t}
+            />
+
+            <PagePopup
+                page={popupPage === null ? null : zones[popupPage].key}
+                onClose={() => setPopupPage(null)}
+                lang={lang}
             />
         </div>
     );

@@ -20,6 +20,8 @@ export class Player {
         this.facingRight = true;
         this.isAttacking = false;
         this.onGround = false;
+        // Plataforma em que o ghost está pisando (null quando está no chão).
+        this.standingOn = null;
     }
 
     draw(c, cameraX = 0) {
@@ -97,6 +99,7 @@ export class Player {
         }
 
         this.onGround = false;
+        this.standingOn = null;
 
         // --- Chão ---
         if (this.position.y + this.height >= floorY) {
@@ -121,6 +124,7 @@ export class Player {
                     this.position.y = platform.y - this.height;
                     this.velocity.y = 0;
                     this.onGround = true;
+                    this.standingOn = platform;
                 }
             }
         }

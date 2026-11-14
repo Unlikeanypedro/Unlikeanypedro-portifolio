@@ -30,6 +30,8 @@ export function buildLevel(viewportWidth, viewportHeight) {
                 y: floorY - block.rise,
                 width: block.width,
                 height: 24,
+                // Cada bloco abre a página da sua sala quando o ghost pisa nele.
+                zone,
             });
         }
     }

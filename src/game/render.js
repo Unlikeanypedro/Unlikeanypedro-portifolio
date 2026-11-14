@@ -2,7 +2,7 @@
  * Desenha chão e blocos no canvas. O fundo é o CSS atrás do canvas, por isso
  * o canvas é limpo (e não preenchido) a cada quadro.
  */
-export function drawWorld(c, level, cameraX, viewportWidth) {
+export function drawWorld(c, level, cameraX, viewportWidth, nearbyZone = null) {
     const { floorY, platforms, height } = level;
 
     // Escurece a base para o ghost "assentar" no chão.
@@ -44,5 +44,43 @@ export function drawWorld(c, level, cameraX, viewportWidth) {
             platform.width - 1,
             platform.height - 6,
         );
+
+        drawSeal(c, platform, x, platform.zone === nearbyZone);
     }
+}
+
+/**
+ * Selo de interação no topo de cada bloco: um pequeno losango com haste,
+ * aceso quando o ghost pode interagir com aquela sala.
+ */
+function drawSeal(c, platform, x, highlighted) {
+    const sealX = x + platform.width / 2;
+    const sealY = platform.y;
+
+    c.save();
+    c.shadowColor = highlighted
+        ? "rgba(214, 230, 255, 0.95)"
+        : "rgba(180, 205, 245, 0.55)";
+    c.shadowBlur = highlighted ? 22 : 12;
+    c.strokeStyle = highlighted
+        ? "rgba(255, 255, 255, 0.95)"
+        : "rgba(214, 230, 255, 0.55)";
+    c.lineWidth = highlighted ? 1.6 : 1.2;
+
+    // Haste
+    c.beginPath();
+    c.moveTo(sealX, sealY - 16);
+    c.lineTo(sealX, sealY);
+    c.stroke();
+
+    // Losango
+    c.beginPath();
+    c.moveTo(sealX, sealY - 38);
+    c.lineTo(sealX + 8, sealY - 27);
+    c.lineTo(sealX, sealY - 16);
+    c.lineTo(sealX - 8, sealY - 27);
+    c.closePath();
+    c.stroke();
+
+    c.restore();
 }
